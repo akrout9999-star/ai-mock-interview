@@ -121,137 +121,106 @@ function App() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-glow auth-glow-one"></div>
-      <div className="auth-glow auth-glow-two"></div>
-
-      <header className="public-nav">
+    <div className="app">
+      <header className="topbar">
         <div className="brand">
-          <div className="brand-mark">TP</div>
+          <div className="brand-mark">IA</div>
 
-          <div className="brand-copy">
-            <strong>TechPrep</strong>
-            <span>Adaptive Interview Intelligence</span>
+          <div>
+            <h1>INTERVIEW/AI</h1>
+            <span>Adaptive AI Interview Platform</span>
           </div>
         </div>
 
-        <div className="public-nav-status">
+        <div className="system-status">
           <span className="status-dot"></span>
-          AI INTERVIEW SYSTEM
+          AI Interview System
         </div>
       </header>
 
-      <main className="auth-shell">
-        <section className="auth-story">
-          <div className="auth-kicker">
-            <span className="kicker-line"></span>
-            AI-POWERED INTERVIEW PRACTICE
-          </div>
+      <main className="auth-layout">
+        <section className="hero-panel">
+          <div className="eyebrow">AI-POWERED INTERVIEW PRACTICE</div>
 
           <h2>
-            Prepare. Answer.
-            <br />
-            Adapt. <span>Improve.</span>
+            Practice interviews that
+            <span> adapt to you.</span>
           </h2>
 
-          <p className="auth-lead">
-            TechPrep generates role-specific interview questions, evaluates your
-            responses, adapts each follow-up, and turns every session into
-            actionable feedback.
+          <p className="hero-description">
+            INTERVIEW/AI generates questions dynamically, evaluates your
+            responses, adapts follow-up questions, and produces a detailed
+            performance report at the end of every session.
           </p>
 
-          <div className="auth-capabilities">
-            <div className="capability">
-              <span className="capability-index">01</span>
-
-              <div>
-                <strong>Dynamic questions</strong>
-                <p>
-                  Generated around your target role, technology stack and
-                  experience level.
-                </p>
-              </div>
+          <div className="feature-grid">
+            <div className="feature-card">
+              <strong>Dynamic Questions</strong>
+              <p>Questions are generated for your role, stack and experience.</p>
             </div>
 
-            <div className="capability">
-              <span className="capability-index">02</span>
-
-              <div>
-                <strong>Adaptive follow-ups</strong>
-                <p>
-                  Each response shapes what the interviewer asks you next.
-                </p>
-              </div>
+            <div className="feature-card">
+              <strong>Adaptive Interviewing</strong>
+              <p>Your answers influence the difficulty and next question.</p>
             </div>
 
-            <div className="capability">
-              <span className="capability-index">03</span>
-
-              <div>
-                <strong>Performance intelligence</strong>
-                <p>
-                  Review strengths, weaknesses and focused development topics
-                  after every session.
-                </p>
-              </div>
+            <div className="feature-card">
+              <strong>AI Evaluation</strong>
+              <p>Responses are evaluated across multiple technical dimensions.</p>
             </div>
-          </div>
 
-          <div className="auth-stack-row">
-            <span>FASTAPI</span>
-            <span>GEMINI</span>
-            <span>POSTGRESQL</span>
-            <span>ADAPTIVE AI</span>
+            <div className="feature-card">
+              <strong>Final Report</strong>
+              <p>Review strengths, weaknesses, scores and recommended topics.</p>
+            </div>
           </div>
         </section>
 
-        <section className="auth-access">
-          <div className="access-card">
-            <div className="access-card-top">
-              <div className="access-orb">
-                <div className="access-orb-core">AI</div>
-              </div>
+        <section className="auth-panel">
+          <div className="auth-card">
+            <div className="auth-heading">
+              <span className="mini-label">
+                {mode === "login" ? "WELCOME BACK" : "CREATE ACCOUNT"}
+              </span>
 
-              <div>
-                <h3>
-                  {mode === "login"
-                    ? "Continue your preparation"
-                    : "Create your workspace"}
-                </h3>
+              <h3>
+                {mode === "login"
+                  ? "Continue your preparation"
+                  : "Start practicing with AI"}
+              </h3>
 
-                <p>
-                  {mode === "login"
-                    ? "Access your interviews and performance history."
-                    : "Create an account and begin adaptive interview practice."}
-                </p>
-              </div>
+              <p>
+                {mode === "login"
+                  ? "Sign in to access your interviews and performance history."
+                  : "Create an account to begin adaptive mock interviews."}
+              </p>
             </div>
 
-            <div className="access-tabs">
+            <div className="auth-switch">
               <button
-                type="button"
                 className={mode === "login" ? "active" : ""}
                 onClick={() => {
                   setMode("login");
                   setError("");
                 }}
+                type="button"
               >
                 Sign in
               </button>
 
               <button
-                type="button"
                 className={mode === "register" ? "active" : ""}
                 onClick={() => {
                   setMode("register");
                   setError("");
                 }}
+                type="button"
               >
                 Register
               </button>
             </div>
 
-            <form className="access-form" onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               {mode === "register" && (
                 <label>
                   Name
@@ -292,33 +261,21 @@ function App() {
 
               {error && <div className="error-message">{error}</div>}
 
-              <button
-                className="primary-button access-submit"
-                type="submit"
-                disabled={loading}
-              >
+              <button className="primary-button" disabled={loading}>
                 {loading
                   ? "Please wait..."
                   : mode === "login"
-                    ? "Sign in to TechPrep"
+                    ? "Sign in to INTERVIEW/AI"
                     : "Create account"}
               </button>
             </form>
 
-            <div className="access-footer">
-              <span className="status-dot"></span>
-              <p>
-                Your interview data is securely associated with your account.
-              </p>
+            <div className="security-note">
+              Your interview data is securely associated with your account.
             </div>
           </div>
         </section>
       </main>
-
-      <footer className="public-footer">
-        <span>TECHPREP / ADAPTIVE INTERVIEW INTELLIGENCE</span>
-        <span>AI-POWERED PRACTICE ENVIRONMENT</span>
-      </footer>
     </div>
   );
 }
