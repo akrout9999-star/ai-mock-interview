@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+backend/venv/
+venv/
+
+# Secrets
+.env
+backend/.env
+frontend/.env
+frontend/.env.local
+*.env.local
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.dbAppCSS_FOR_REVIEW.txt
