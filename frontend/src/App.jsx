@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { api, getToken, setToken } from "./api/client";
+
 import Dashboard from "./pages/Dashboard";
 import InterviewRoom from "./pages/InterviewRoom";
 import Report from "./pages/Report";
+
 import "./App.css";
-import "./AuthRecovery.css";
 
 function App() {
   const [authenticated, setAuthenticated] = useState(Boolean(getToken()));
@@ -22,20 +23,30 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isLogin = mode === "login";
+
   function handleChange(event) {
+    const { name, value } = event.target;
+
     setForm((current) => ({
       ...current,
-      [event.target.name]: event.target.value,
+      [name]: value,
     }));
+  }
+
+  function changeMode(nextMode) {
+    setMode(nextMode);
+    setError("");
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     setError("");
     setLoading(true);
 
     try {
-      if (mode === "register") {
+      if (!isLogin) {
         await api.register({
           name: form.name,
           email: form.email,
@@ -47,16 +58,18 @@ function App() {
           ...current,
           password: "",
         }));
-      } else {
-        const data = await api.login({
-          email: form.email,
-          password: form.password,
-        });
 
-        setToken(data.access_token);
-        setAuthenticated(true);
-        setScreen("dashboard");
+        return;
       }
+
+      const data = await api.login({
+        email: form.email,
+        password: form.password,
+      });
+
+      setToken(data.access_token);
+      setAuthenticated(true);
+      setScreen("dashboard");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -86,6 +99,7 @@ function App() {
   }
 
   function logout() {
+    setToken(null);
     setAuthenticated(false);
     setSession(null);
     setReportInterviewId(null);
@@ -122,107 +136,119 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-mark">IA</div>
+    <div className="auth-page">
+      <div className="auth-glow auth-glow-one" />
+      <div className="auth-glow auth-glow-two" />
 
-          <div>
-            <h1>INTERVIEW/AI</h1>
-            <span>Adaptive AI Interview Platform</span>
+      <header className="public-nav">
+        <div className="brand">
+          <div className="brand-mark">TP</div>
+
+          <div className="brand-copy">
+            <strong>
+              Tech<span>Prep</span>
+            </strong>
+            <span>Adaptive interview workspace</span>
           </div>
         </div>
 
-        <div className="system-status">
-          <span className="status-dot"></span>
-          AI Interview System
+        <div className="public-nav-status">
+          <span className="status-dot" />
+          AI INTERVIEW SYSTEM
         </div>
       </header>
 
-      <main className="auth-layout">
-        <section className="hero-panel">
-          <div className="eyebrow">AI-POWERED INTERVIEW PRACTICE</div>
+      <main className="auth-shell">
+        <section className="auth-story">
+          <div className="auth-kicker">
+            <span className="kicker-line" />
+            AI-POWERED INTERVIEW PRACTICE
+          </div>
 
           <h2>
-            Practice interviews that
-            <span> adapt to you.</span>
+            Prepare. Answer.
+            <br />
+            Adapt. <span>Improve.</span>
           </h2>
 
-          <p className="hero-description">
-            INTERVIEW/AI generates questions dynamically, evaluates your
-            responses, adapts follow-up questions, and produces a detailed
-            performance report at the end of every session.
+          <p className="auth-lead">
+            Practice adaptive interviews that respond to your answers, challenge
+            your reasoning, and turn every session into actionable feedback.
           </p>
 
-          <div className="feature-grid">
-            <div className="feature-card">
-              <strong>Dynamic Questions</strong>
-              <p>Questions are generated for your role, stack and experience.</p>
+          <div className="auth-capabilities">
+            <div className="capability">
+              <span className="capability-index">01</span>
+              <div>
+                <strong>Adaptive questions</strong>
+                <p>Questions evolve with your answers and experience.</p>
+              </div>
             </div>
 
-            <div className="feature-card">
-              <strong>Adaptive Interviewing</strong>
-              <p>Your answers influence the difficulty and next question.</p>
+            <div className="capability">
+              <span className="capability-index">02</span>
+              <div>
+                <strong>AI evaluation</strong>
+                <p>Get focused feedback on how you reason and respond.</p>
+              </div>
             </div>
 
-            <div className="feature-card">
-              <strong>AI Evaluation</strong>
-              <p>Responses are evaluated across multiple technical dimensions.</p>
-            </div>
-
-            <div className="feature-card">
-              <strong>Final Report</strong>
-              <p>Review strengths, weaknesses, scores and recommended topics.</p>
+            <div className="capability">
+              <span className="capability-index">03</span>
+              <div>
+                <strong>Performance report</strong>
+                <p>Leave every session knowing exactly what to improve.</p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="auth-panel">
-          <div className="auth-card">
-            <div className="auth-heading">
-              <span className="mini-label">
-                {mode === "login" ? "WELCOME BACK" : "CREATE ACCOUNT"}
-              </span>
+        <section className="auth-access">
+          <div className="access-card">
+            <div className="access-card-top">
+              <div className="access-orb">
+                <span className="access-orb-core" />
+              </div>
 
-              <h3>
-                {mode === "login"
-                  ? "Continue your preparation"
-                  : "Start practicing with AI"}
-              </h3>
+              <div>
+                <span className="mini-label">
+                  {isLogin ? "WELCOME BACK" : "CREATE ACCOUNT"}
+                </span>
 
-              <p>
-                {mode === "login"
-                  ? "Sign in to access your interviews and performance history."
-                  : "Create an account to begin adaptive mock interviews."}
-              </p>
+                <h3>
+                  {isLogin
+                    ? "Continue your preparation"
+                    : "Start your preparation"}
+                </h3>
+
+                <p>
+                  {isLogin
+                    ? "Sign in to access your interviews and performance history."
+                    : "Create your account and begin an adaptive mock interview."}
+                </p>
+              </div>
             </div>
 
-            <div className="auth-switch">
+            <div className="access-tabs">
               <button
-                className={mode === "login" ? "active" : ""}
-                onClick={() => {
-                  setMode("login");
-                  setError("");
-                }}
+                className={isLogin ? "active" : ""}
                 type="button"
+                onClick={() => changeMode("login")}
               >
                 Sign in
               </button>
 
               <button
-                className={mode === "register" ? "active" : ""}
-                onClick={() => {
-                  setMode("register");
-                  setError("");
-                }}
+                className={!isLogin ? "active" : ""}
                 type="button"
+                onClick={() => changeMode("register")}
               >
                 Register
               </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              {mode === "register" && (
+            <form className="access-form" onSubmit={handleSubmit}>
+              {!isLogin && (
                 <label>
                   Name
                   <input
@@ -255,28 +281,42 @@ function App() {
                   value={form.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  minLength="8"
+                  minLength={8}
                   required
                 />
               </label>
 
               {error && <div className="error-message">{error}</div>}
 
-              <button className="primary-button" disabled={loading}>
+              <button
+                className="access-submit"
+                type="submit"
+                disabled={loading}
+              >
                 {loading
                   ? "Please wait..."
-                  : mode === "login"
-                    ? "Sign in to INTERVIEW/AI"
+                  : isLogin
+                    ? "Sign in"
                     : "Create account"}
               </button>
             </form>
 
-            <div className="security-note">
+            <div className="access-footer">
               Your interview data is securely associated with your account.
             </div>
           </div>
         </section>
       </main>
+
+      <footer className="public-footer">
+        <span>TECHPREP</span>
+
+        <span>
+          Built by <strong>Asish</strong> · © 2026
+        </span>
+
+        <span>Your preparation. Your evidence. Your next level.</span>
+      </footer>
     </div>
   );
 }

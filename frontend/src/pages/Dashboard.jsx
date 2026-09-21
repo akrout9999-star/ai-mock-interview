@@ -27,6 +27,16 @@ const HERO_WORDS = [
   ["Improve.", "Grow.", "Advance.", "Succeed."],
 ];
 
+const INITIAL_FORM = {
+  target_role: "Backend Developer",
+  experience_level: "Entry Level",
+  interview_type: "Technical",
+  programming_language: "Python",
+  focus_area: "FastAPI, REST APIs, PostgreSQL",
+  difficulty: "Medium",
+  total_questions: 5,
+};
+
 function Dashboard({
   onLogout,
   onInterviewStarted,
@@ -37,18 +47,11 @@ function Dashboard({
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
+
   const [heroIndexes, setHeroIndexes] = useState([0, 0, 0, 0]);
   const [heroStep, setHeroStep] = useState(0);
 
-  const [form, setForm] = useState({
-    target_role: "Backend Developer",
-    experience_level: "Entry Level",
-    interview_type: "Technical",
-    programming_language: "Python",
-    focus_area: "FastAPI, REST APIs, PostgreSQL",
-    difficulty: "Medium",
-    total_questions: 5,
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
 
   useEffect(() => {
     loadInterviews();
@@ -57,11 +60,13 @@ function Dashboard({
   useEffect(() => {
     const timer = window.setInterval(() => {
       setHeroStep((currentStep) => {
-        const slot = currentStep % 4;
+        const slot = currentStep % HERO_WORDS.length;
 
-        setHeroIndexes((current) =>
-          current.map((value, index) =>
-            index === slot ? (value + 1) % HERO_WORDS[index].length : value
+        setHeroIndexes((currentIndexes) =>
+          currentIndexes.map((wordIndex, index) =>
+            index === slot
+              ? (wordIndex + 1) % HERO_WORDS[index].length
+              : wordIndex
           )
         );
 
@@ -94,10 +99,7 @@ function Dashboard({
 
     setForm((current) => ({
       ...current,
-      [name]:
-        name === "total_questions"
-          ? Number(value)
-          : value,
+      [name]: name === "total_questions" ? Number(value) : value,
     }));
   }
 
@@ -109,9 +111,7 @@ function Dashboard({
       setError("");
 
       const data = await api.createInterview(form);
-
-      const interview = data.interview;
-      const firstQuestion = data.first_question;
+      const { interview, first_question: firstQuestion } = data;
 
       if (!interview?.id || !firstQuestion?.content) {
         throw new Error(
@@ -137,17 +137,19 @@ function Dashboard({
   }
 
   const completed = interviews.filter(
-    (item) => item.status === "completed"
+    ({ status }) => status === "completed"
   ).length;
 
   const active = interviews.filter(
-    (item) => item.status === "active"
+    ({ status }) => status === "active"
   ).length;
 
-  const completionRate =
-    interviews.length > 0
-      ? Math.round((completed / interviews.length) * 100)
-      : 0;
+  const completionRate = interviews.length
+    ? Math.round((completed / interviews.length) * 100)
+    : 0;
+
+  const activeHeroSlot =
+    (heroStep - 1 + HERO_WORDS.length) % HERO_WORDS.length;
 
   return (
     <div className="workspace-page">
@@ -158,7 +160,9 @@ function Dashboard({
           </div>
 
           <div className="brand-copy">
-            <h1>Tech<span className="brand-accent">Prep</span></h1>
+            <h1>
+              Tech<span className="brand-accent">Prep</span>
+            </h1>
             <span>Adaptive interview workspace</span>
           </div>
         </div>
@@ -184,6 +188,7 @@ function Dashboard({
       </header>
 
       <main className="workspace-shell">
+        {/* HERO */}
         <section className="workspace-intro">
           <div className="workspace-intro-copy">
             <div
@@ -200,12 +205,18 @@ function Dashboard({
               <h2>
                 {HERO_WORDS.map((words, slot) => {
                   const wordIndex = heroIndexes[slot];
-                  const activeSlot = (heroStep - 1 + 4) % 4;
 
                   return (
                     <span
-                      className={`hero-live-word hero-live-word-${slot + 1} ${activeSlot === slot ? "hero-live-word-active" : ""
-                        }`}
+                      className={[
+                        "hero-live-word",
+                        `hero-live-word-${slot + 1}`,
+                        activeHeroSlot === slot
+                          ? "hero-live-word-active"
+                          : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
                       key={`${slot}-${wordIndex}`}
                     >
                       {words[wordIndex]}
@@ -220,27 +231,21 @@ function Dashboard({
               follows your reasoning, adjusts the challenge, and builds your
               performance report.
             </p>
-
-
           </div>
 
           <button
             className="primary-button new-interview-button"
             type="button"
-            onClick={() =>
-              setShowSetup((current) => !current)
-            }
+            onClick={() => setShowSetup((current) => !current)}
           >
             <span>
-              {showSetup
-                ? "Close configuration"
-                : "New interview"}
+              {showSetup ? "Close configuration" : "New interview"}
             </span>
-
             <span>{showSetup ? "×" : "+"}</span>
           </button>
         </section>
 
+        {/* OVERVIEW */}
         <section className="workspace-overview">
           <article className="overview-primary">
             <div className="overview-label">
@@ -249,10 +254,8 @@ function Dashboard({
 
             <div className="overview-number-row">
               <strong>{interviews.length}</strong>
-
               <span>
-                interview
-                {interviews.length === 1 ? "" : "s"} recorded
+                interview{interviews.length === 1 ? "" : "s"} recorded
               </span>
             </div>
 
@@ -265,9 +268,7 @@ function Dashboard({
               <div className="overview-track">
                 <div
                   className="overview-fill"
-                  style={{
-                    width: `${completionRate}%`,
-                  }}
+                  style={{ width: `${completionRate}%` }}
                 />
               </div>
             </div>
@@ -283,9 +284,7 @@ function Dashboard({
           </article>
 
           <article className="overview-stat">
-            <span className="overview-icon pulse-icon">
-              ◌
-            </span>
+            <span className="overview-icon pulse-icon">◌</span>
 
             <div>
               <span>Active</span>
@@ -298,13 +297,12 @@ function Dashboard({
 
             <div>
               <span>Interview mode</span>
-              <strong className="overview-word">
-                Adaptive
-              </strong>
+              <strong className="overview-word">Adaptive</strong>
             </div>
           </article>
         </section>
 
+        {/* INTERVIEW CONFIGURATION */}
         {showSetup && (
           <section className="configuration-panel">
             <div className="configuration-side">
@@ -313,18 +311,10 @@ function Dashboard({
               </span>
 
               <h3>
-                Tell the interviewer what you're preparing for.
+                Configure Yourself.
               </h3>
-
-              <p>
-                Your configuration becomes hard context for the AI.
-                Questions stay aligned with your role, language,
-                stack and experience level.
-              </p>
-
               <div className="configuration-preview">
                 <span>SESSION PREVIEW</span>
-
                 <strong>{form.target_role}</strong>
 
                 <div className="preview-tags">
@@ -333,9 +323,7 @@ function Dashboard({
                   <span>{form.total_questions} questions</span>
                 </div>
 
-                {form.focus_area && (
-                  <p>{form.focus_area}</p>
-                )}
+                {form.focus_area && <p>{form.focus_area}</p>}
               </div>
             </div>
 
@@ -348,16 +336,12 @@ function Dashboard({
 
                 <div>
                   <strong>Candidate target</strong>
-                  <p>
-                    Define the position and your current level.
-                  </p>
                 </div>
               </div>
 
               <div className="form-grid">
                 <label className="field field-wide">
                   <span>Target role</span>
-
                   <input
                     name="target_role"
                     value={form.target_role}
@@ -369,7 +353,6 @@ function Dashboard({
 
                 <label className="field">
                   <span>Experience level</span>
-
                   <select
                     name="experience_level"
                     value={form.experience_level}
@@ -384,7 +367,6 @@ function Dashboard({
 
                 <label className="field">
                   <span>Interview type</span>
-
                   <select
                     name="interview_type"
                     value={form.interview_type}
@@ -404,38 +386,28 @@ function Dashboard({
 
                 <div>
                   <strong>Technical context</strong>
-                  <p>
-                    Keep the AI inside the ecosystem you want to
-                    practice.
-                  </p>
+
                 </div>
               </div>
 
               <div className="form-grid">
                 <label className="field">
                   <span>Programming language</span>
-
                   <select
                     name="programming_language"
                     value={form.programming_language}
                     onChange={handleChange}
                   >
-                    {LANGUAGES.map(
-                      ([value, label]) => (
-                        <option
-                          key={value}
-                          value={value}
-                        >
-                          {label}
-                        </option>
-                      )
-                    )}
+                    {LANGUAGES.map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
                   </select>
                 </label>
 
                 <label className="field field-wide">
                   <span>Focus / frameworks</span>
-
                   <input
                     name="focus_area"
                     value={form.focus_area}
@@ -452,17 +424,13 @@ function Dashboard({
 
                 <div>
                   <strong>Session intensity</strong>
-                  <p>
-                    Choose how demanding and how long the round
-                    should be.
-                  </p>
+
                 </div>
               </div>
 
               <div className="form-grid">
                 <label className="field">
                   <span>Difficulty</span>
-
                   <select
                     name="difficulty"
                     value={form.difficulty}
@@ -476,7 +444,6 @@ function Dashboard({
 
                 <label className="field">
                   <span>Number of questions</span>
-
                   <select
                     name="total_questions"
                     value={form.total_questions}
@@ -504,6 +471,7 @@ function Dashboard({
 
                 <button
                   className="primary-button"
+                  type="submit"
                   disabled={creating}
                 >
                   <span>
@@ -525,6 +493,7 @@ function Dashboard({
           </div>
         )}
 
+        {/* INTERVIEW HISTORY */}
         <section className="history-section">
           <div className="history-section-head">
             <div>
@@ -535,8 +504,8 @@ function Dashboard({
               <h3>Your sessions</h3>
 
               <p>
-                Review completed rounds and continue building
-                evidence of your progress.
+                Review completed rounds and continue building evidence
+                of your progress.
               </p>
             </div>
 
@@ -557,12 +526,8 @@ function Dashboard({
           ) : interviews.length === 0 ? (
             <div className="history-empty">
               <span className="empty-symbol">＋</span>
-
               <strong>No interviews yet</strong>
-
-              <p>
-                Configure your first adaptive session to begin.
-              </p>
+              <p>Configure your first adaptive session to begin.</p>
             </div>
           ) : (
             <div className="session-table">
@@ -576,11 +541,14 @@ function Dashboard({
 
               {interviews.map((interview) => {
                 const language =
-                  interview.programming_language ||
-                  "General";
+                  interview.programming_language || "General";
 
                 const isCompleted =
                   interview.status === "completed";
+
+                const statusClass = isCompleted
+                  ? "completed"
+                  : "active";
 
                 return (
                   <article
@@ -588,18 +556,9 @@ function Dashboard({
                     key={interview.id}
                   >
                     <div className="session-role">
-                      <span className="session-index">
-                        {String(interview.id).padStart(2, "0")}
-                      </span>
-
                       <div>
-                        <strong>
-                          {interview.target_role}
-                        </strong>
-
-                        <span>
-                          {interview.experience_level}
-                        </span>
+                        <strong>{interview.target_role}</strong>
+                        <span>{interview.experience_level}</span>
                       </div>
                     </div>
 
@@ -613,16 +572,12 @@ function Dashboard({
                         {interview.current_question}/
                         {interview.total_questions}
                       </strong>
-
                       <span>questions</span>
                     </div>
 
                     <div>
                       <span
-                        className={`session-status ${isCompleted
-                          ? "completed"
-                          : "active"
-                          }`}
+                        className={`session-status ${statusClass}`}
                       >
                         <span />
                         {interview.status}
@@ -655,19 +610,18 @@ function Dashboard({
       </main>
 
       <footer className="workspace-footer">
-  <span>TECHPREP</span>
+        <span>TECHPREP</span>
 
-  <span className="footer-credit">
-    Built by <strong>Asish</strong> · © 2026
-  </span>
+        <span className="footer-credit">
+          Built by <strong>Asish</strong> · © 2026
+        </span>
 
-  <span>
-    Your preparation. Your evidence. Your next level.
-  </span>
-</footer>
+        <span>
+          Your preparation. Your evidence. Your next level.
+        </span>
+      </footer>
     </div>
   );
 }
 
 export default Dashboard;
-

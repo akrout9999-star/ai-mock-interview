@@ -4,10 +4,53 @@ from google import genai
 
 from config import GEMINI_API_KEY
 
+import time
+from google.genai import errors
+
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-MODEL_NAME = "gemini-3-flash-preview"
+MODEL_NAMES = [
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
+]
+
+
+def generate_content_with_retry(prompt, max_retries=3):
+    last_error = None
+
+    for model_name in MODEL_NAMES:
+        for attempt in range(max_retries):
+            try:
+                return client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                )
+
+            except errors.ServerError as error:
+                last_error = error
+
+                status_code = getattr(error, "status_code", None)
+                if status_code is None:
+                    status_code = getattr(error, "code", None)
+
+                # Only retry/fallback for temporary server errors.
+                if status_code not in (500, 502, 503, 504):
+                    raise
+
+                # Retry this model before falling back.
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)
+
+        # This model exhausted its retries.
+        # Continue automatically with the next model.
+
+    # Every model failed.
+    if last_error:
+        raise last_error
+
+    raise RuntimeError("No Gemini model was available.")
 
 
 INTERVIEW_PRINCIPLES = """
@@ -78,7 +121,18 @@ INTERVIEW PHILOSOPHY:
 
 12. Keep the interview appropriate to the candidate's stated experience.
 """
+# def generate_content_with_retry(prompt, max_retries=3):
+#     for attempt in range(max_retries):
+#         try:
+#             return client.models.generate_content(
+#                 model=MODEL_NAME,
+#                 contents=prompt,
+#             )
+#         except errors.ServerError as error:
+#             if error.code != 503 or attempt == max_retries - 1:
+#                 raise
 
+#             time.sleep(2 ** attempt)
 
 def generate_first_question(
     target_role,
@@ -126,10 +180,7 @@ QUESTION SELECTION RULES:
 Return only the interview question.
 """
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt
-    )
+    response = generate_content_with_retry(prompt)
 
     question = response.text
 
@@ -296,10 +347,7 @@ Do not use markdown.
 Do not wrap the JSON in ```json.
 """
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=prompt
-    )
+    response = generate_content_with_retry(prompt)
 
     raw_response = response.text
 
