@@ -14,6 +14,38 @@ The application combines a responsive React interface with a FastAPI backend, Po
 
 ---
 
+## Screenshots
+
+### Authentication
+
+TechPrep provides a focused authentication experience with a responsive interface and clear access to interview preparation.
+
+![TechPrep Authentication](screenshots/01-authentication.png)
+
+### Interview Dashboard
+
+The dashboard provides an overview of interview activity, completion status, previous sessions, and access to generated performance reports.
+
+![TechPrep Dashboard](screenshots/02-dashboard.png)
+
+### Interview Configuration
+
+Candidates can configure each interview by selecting the target role, experience level, interview type, programming language, focus areas, difficulty, and number of questions.
+
+![TechPrep Interview Configuration](screenshots/03-interview-configuration.png)
+
+### Performance Report
+
+After an interview is completed, TechPrep generates a structured report covering technical knowledge, communication, problem solving, technical depth, and answer relevance.
+
+![TechPrep Performance Report](screenshots/04-performance-report.png)
+
+### Performance Profile
+
+The report includes a visual performance profile and presents the adaptive interview cycle from configuration through evaluation and improvement.
+
+![TechPrep Performance Profile](screenshots/05-performance-profile.png)
+
 ## Features
 
 ### Adaptive AI Interviews
