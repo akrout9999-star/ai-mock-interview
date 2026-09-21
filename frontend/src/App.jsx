@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import InterviewRoom from "./pages/InterviewRoom";
 import Report from "./pages/Report";
 import "./App.css";
+import "./AuthRecovery.css";
 
 function App() {
   const [authenticated, setAuthenticated] = useState(Boolean(getToken()));
